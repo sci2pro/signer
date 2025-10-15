@@ -53,7 +53,7 @@ class ImageViewer:
 
         # Click to print image coordinates (relative to the original image)
         self.canvas.bind("<Button-1>", self._print_image_coords)
-        self.coordinates_file = "signature_coords.txt"
+        self.name_coordinates_file = "name_coords.txt"
 
     def _render(self):
         # Re-render the scaled image and update the scrollregion
@@ -138,9 +138,9 @@ class ImageViewer:
         ix = int(cx / self.scale)
         iy = int(cy / self.scale)
         print(f"Clicked coordinates (image space): x={ix}, y={iy}")
-        # write the last clicked coordinates to a file e.g., signature_coords.txt
-        with open(self.coordinates_file, "w") as f:
-            print(f"Writing signature coords to file {self.coordinates_file}")
+        # write the last clicked coordinates to a file e.g., name_coords.txt
+        with open(self.name_coordinates_file, "w") as f:
+            print(f"Writing signature coords to file {self.name_coordinates_file}")
             f.write(f"{ix},{iy}\n")
 
     def run(self):
@@ -152,17 +152,18 @@ def write_text_on_png(text, png, location=None):
     # write text on the image at location
     img = Image.open(png)
     draw = ImageDraw.Draw(img)
-    # font_path = "arial.ttf"
-    font_path = "fonts/Chomsky.otf"
+    # font_path = "fonts/arial.ttf"
+    # font_path = "fonts/Chomsky.otf"
+    font_path = "fonts/Nuptial Liberty.ttf"
     font_size = 50
     font = ImageFont.truetype(font_path, font_size)
     # we need to know the length of the font so that we can adjust
     font_width = font.getlength(text)
     text_colour = (0, 0, 0)  # red
     # get the location to sign
-    with open("signature_coords.txt") as f:
-        signature_coords = f.readlines()
-    text_x, text_y = tuple(map(int, signature_coords[0].split(",")))
+    with open("name_coords.txt") as f:
+        name_coords = f.readlines()
+    text_x, text_y = tuple(map(int, name_coords[0].split(",")))
     # adjust the x value
     draw.text((text_x - font_width / 2, text_y), text, font=font, fill=text_colour)
     img.save(f"{text}-certificate.png")
@@ -173,7 +174,7 @@ def main():
     names = [
         "Paul K. Korir",
     ]
-    template = "template.png"
+    template = "templates/template.png"
     for name in names:
         write_text_on_png(name, template)
     # get_image_point_coordinates(template)
