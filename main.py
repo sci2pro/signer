@@ -1,3 +1,5 @@
+import argparse
+import pathlib
 import sys
 import tkinter as tk
 
@@ -7,12 +9,13 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 class ImageViewer:
     """Zoomable and scrollable image view with Tkinter Canvas"""
 
-    def __init__(self, image_path):
+    def __init__(self, image_path, show_grid=True):
         self.root = tk.Tk()
         self.root.title("Image Viewer")
         self.image_path = image_path
         self.pil_image = Image.open(image_path)
         self.scale = 1.0  # 1:1
+        self.show_grid = show_grid
 
         # Canvas + scrollbars
         self.canvas = tk.Canvas(self.root, highlightthickness=0, bg="#888888")
@@ -67,17 +70,18 @@ class ImageViewer:
         else:
             self.canvas.itemconfig(self.image_id, image=self.tk_image)
         self.canvas.configure(scrollregion=(0, 0, sw, sh))
-        # Add calibration grid (red) – scales with current zoom
-        # Clear any previous grid lines
-        self.canvas.delete("grid")
+        if self.show_grid:
+            # Add calibration grid (red) – scales with current zoom
+            # Clear any previous grid lines
+            self.canvas.delete("grid")
 
-        # vertical lines at 1/4, 1/2, 3/4 of the current scaled width
-        for x in (sw / 4, sw / 2, 3 * sw / 4):
-            self.canvas.create_line(x, 0, x, sh, fill="#ff0000", tags=("grid",))
+            # vertical lines at 1/4, 1/2, 3/4 of the current scaled width
+            for x in (sw / 4, sw / 2, 3 * sw / 4):
+                self.canvas.create_line(x, 0, x, sh, fill="#ff0000", tags=("grid",))
 
-        # horizontal lines at 1/4, 1/2, 3/4 of the current scaled height
-        for y in (sh / 4, sh / 2, 3 * sh / 4):
-            self.canvas.create_line(0, y, sw, y, fill="#ff0000", tags=("grid",))
+            # horizontal lines at 1/4, 1/2, 3/4 of the current scaled height
+            for y in (sh / 4, sh / 2, 3 * sh / 4):
+                self.canvas.create_line(0, y, sw, y, fill="#ff0000", tags=("grid",))
 
     def _on_mousewheel_windows_macos(self, event):
         # If Ctrl is pressed, zoom instead of scroll
@@ -148,14 +152,12 @@ class ImageViewer:
         self.root.mainloop()
 
 
-def write_text_on_png(text, png, location=None):
+def write_text_on_png(text, png, output_dir=pathlib.Path("./"), font_path="fonts/arial.ttf", font_size=50):
     # write text on the image at location
     img = Image.open(png)
     draw = ImageDraw.Draw(img)
     # font_path = "fonts/arial.ttf"
     # font_path = "fonts/Chomsky.otf"
-    font_path = "fonts/Nuptial Liberty.ttf"
-    font_size = 50
     font = ImageFont.truetype(font_path, font_size)
     # we need to know the length of the font so that we can adjust
     font_width = font.getlength(text)
@@ -166,20 +168,46 @@ def write_text_on_png(text, png, location=None):
     text_x, text_y = tuple(map(int, name_coords[0].split(",")))
     # adjust the x value
     draw.text((text_x - font_width / 2, text_y), text, font=font, fill=text_colour)
-    img.save(f"{text}-certificate.png")
+    img.save(output_dir / f"{text}-certificate.png")
     return
 
 
 def main():
-    names = [
-        "Paul K. Korir",
-    ]
-    template = "templates/template.png"
-    for name in names:
-        write_text_on_png(name, template)
-    # get_image_point_coordinates(template)
-    image_viewer = ImageViewer(template)
-    image_viewer.run()
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
+
+    # label parser
+    label_parser = subparsers.add_parser("label", help="Label image")
+    label_parser.add_argument("-n", "--names", help="A CSV file with a name on each row")
+    label_parser.add_argument("-t", "--template", help="A template image")
+    label_parser.add_argument("-O", "--output-dir", default="output_dir", type=pathlib.Path, help="Output directory")
+    label_parser.add_argument("-F", "--font", default="fonts/arial.ttf", help="Font file [default: arial.ttf]")
+    label_parser.add_argument("-S", "--font-size", default=50, type=int, help="Font size [default: 50]")
+
+
+    # view parser
+    view_parser = subparsers.add_parser("view", help="Image viewer")
+    view_parser.add_argument("image_name", help="Image name")
+    view_parser.add_argument("-g", "--show-grid", action="store_true",
+                             help="Hide the calibration grid [default: false]")
+
+    args = parser.parse_args()
+
+    # signer label -n names.csv -t template.png -F font.ttf -O output_folder
+    if args.command == "label":
+        names = list()
+        with open(args.names, "r") as f:
+            names = f.readlines()
+        print(names)
+        if not args.output_dir.exists():
+            args.output_dir.mkdir(parents=True)
+        for name in names:
+            write_text_on_png(name, args.template, output_dir=args.output_dir, font_path=args.font, font_size=args.font_size)
+    # signer view template.png [--show-grid]
+    elif args.command == "view":
+        image_viewer = ImageViewer(args.image_name, show_grid=args.show_grid)
+        image_viewer.run()
+
     return 0
 
 
