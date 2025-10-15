@@ -24,7 +24,7 @@ class ImageViewer:
         w, h = self.pil_image.size
         self.canvas.configure(width=min(1000, w), height=min(800, h))
         self.canvas.grid(row=0, column=0, sticky="nsew")
-        self.vbar.grid(row=0, column=1, stick="ns")
+        self.vbar.grid(row=0, column=1, sticky="ns")
         self.hbar.grid(row=1, column=0, sticky="ew")
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
@@ -67,6 +67,17 @@ class ImageViewer:
         else:
             self.canvas.itemconfig(self.image_id, image=self.tk_image)
         self.canvas.configure(scrollregion=(0, 0, sw, sh))
+        # Add calibration grid (red) – scales with current zoom
+        # Clear any previous grid lines
+        self.canvas.delete("grid")
+
+        # vertical lines at 1/4, 1/2, 3/4 of the current scaled width
+        for x in (sw / 4, sw / 2, 3 * sw / 4):
+            self.canvas.create_line(x, 0, x, sh, fill="#ff0000", tags=("grid",))
+
+        # horizontal lines at 1/4, 1/2, 3/4 of the current scaled height
+        for y in (sh / 4, sh / 2, 3 * sh / 4):
+            self.canvas.create_line(0, y, sw, y, fill="#ff0000", tags=("grid",))
 
     def _on_mousewheel_windows_macos(self, event):
         # If Ctrl is pressed, zoom instead of scroll
@@ -141,12 +152,19 @@ def write_text_on_png(text, png, location=None):
     # write text on the image at location
     img = Image.open(png)
     draw = ImageDraw.Draw(img)
-    font_path = "arial.ttf"
-    font_size = 40
+    # font_path = "arial.ttf"
+    font_path = "Chomsky.otf"
+    font_size = 50
     font = ImageFont.truetype(font_path, font_size)
-    text_colur = (255, 0, 0)  # red
-    text_position = (50, 50)
-    draw.text(text_position, text, font=font, fill=text_colur)
+    # we need to know the length of the font so that we can adjust
+    font_width = font.getlength(text)
+    text_colour = (0, 0, 0)  # red
+    # get the location to sign
+    with open("signature_coords.txt") as f:
+        signature_coords = f.readlines()
+    text_x, text_y = tuple(map(int, signature_coords[0].split(",")))
+    # adjust the x value
+    draw.text((text_x - font_width / 2, text_y), text, font=font, fill=text_colour)
     img.save(f"{text}-certificate.png")
     return
 
@@ -171,12 +189,12 @@ def get_image_point_coordinates(image_path):
 
 
 def main():
-    # names = [
-    #     "Paul K. Korir",
-    # ]
+    names = [
+        "Paul K. Korir",
+    ]
     template = "template.png"
-    # for name in names:
-    #     write_text_on_png(name, template)
+    for name in names:
+        write_text_on_png(name, template)
     # get_image_point_coordinates(template)
     image_viewer = ImageViewer(template)
     image_viewer.run()
