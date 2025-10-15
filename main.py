@@ -153,7 +153,7 @@ def write_text_on_png(text, png, location=None):
     img = Image.open(png)
     draw = ImageDraw.Draw(img)
     # font_path = "arial.ttf"
-    font_path = "Chomsky.otf"
+    font_path = "fonts/Chomsky.otf"
     font_size = 50
     font = ImageFont.truetype(font_path, font_size)
     # we need to know the length of the font so that we can adjust
@@ -167,25 +167,6 @@ def write_text_on_png(text, png, location=None):
     draw.text((text_x - font_width / 2, text_y), text, font=font, fill=text_colour)
     img.save(f"{text}-certificate.png")
     return
-
-
-def get_coordinates(event):
-    x, y = event.x, event.y
-    print(f"Clicked coordinates: x={x}, y={y}")
-
-
-def get_image_point_coordinates(image_path):
-    image = Image.open(image_path)
-    width, height = image.size
-    root = tk.Tk()
-    canvas = tk.Canvas(root, width=width, height=height)
-    canvas.pack()
-
-    print(f"Image size: {image.size}")
-    photo = ImageTk.PhotoImage(image)
-    canvas.create_image(0, 0, anchor=tk.NW, image=photo)
-    canvas.bind("<Button-1>", get_coordinates)  # binds left-click
-    root.mainloop()
 
 
 def main():
