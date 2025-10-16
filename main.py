@@ -152,27 +152,51 @@ class ImageViewer:
         self.root.mainloop()
 
 
-def write_text_on_png(text, png, output_dir=pathlib.Path("./"), font_path="fonts/arial.ttf", font_size=50):
-    # write text on the image at location
-    img = Image.open(png)
-    draw = ImageDraw.Draw(img)
-    # font_path = "fonts/arial.ttf"
-    # font_path = "fonts/Chomsky.otf"
-    font = ImageFont.truetype(font_path, font_size)
-    # we need to know the length of the font so that we can adjust
-    font_width = font.getlength(text)
-    text_colour = (0, 0, 0)  # red
-    # get the location to sign
-    with open("name_coords.txt") as f:
-        name_coords = f.readlines()
-    text_x, text_y = tuple(map(int, name_coords[0].split(",")))
-    # adjust the x value
-    draw.text((text_x - font_width / 2, text_y), text, font=font, fill=text_colour)
-    img.save(output_dir / f"{text}-certificate.png")
+# def write_text_on_png(text, png, output_dir=pathlib.Path("./"), font_path="fonts/arial.ttf", font_size=50):
+def label_certificates(args):
+    names = list()
+    with open(args.names, "r") as f:
+        names = f.readlines()
+    print(names)
+    if not args.output_dir.exists():
+        args.output_dir.mkdir(parents=True)
+    for name in names:
+        # write text on the image at location
+        img = Image.open(args.template)
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype(args.font_path, args.font_size)
+        # we need to know the length of the font so that we can adjust
+        font_width = font.getlength(name)
+        text_colour = (0, 0, 0)  # red
+        # get the location to sign
+        with open("name_coords.txt") as f:
+            name_coords = f.readlines()
+        text_x, text_y = tuple(map(int, name_coords[0].split(",")))
+        # adjust the x value
+        draw.text((text_x - font_width / 2, text_y), name, font=font, fill=text_colour)
+        img.save(args.output_dir / f"{name}-certificate.png")
     return
 
 
 def main():
+    args = parse_args()
+
+    # signer label -n names.csv -t template.png -F font.ttf -O output_folder
+    if args.command == "label":
+        label_certificates(args)
+    # signer view template.png [--show-grid]
+    elif args.command == "view":
+        view_template(args)
+
+    return 0
+
+
+def view_template(args: argparse.Namespace):
+    image_viewer = ImageViewer(args.image_name, show_grid=args.show_grid)
+    image_viewer.run()
+
+
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
 
@@ -181,9 +205,8 @@ def main():
     label_parser.add_argument("-n", "--names", help="A CSV file with a name on each row")
     label_parser.add_argument("-t", "--template", help="A template image")
     label_parser.add_argument("-O", "--output-dir", default="output_dir", type=pathlib.Path, help="Output directory")
-    label_parser.add_argument("-F", "--font", default="fonts/arial.ttf", help="Font file [default: arial.ttf]")
+    label_parser.add_argument("-F", "--font-path", default="fonts/arial.ttf", help="Font file [default: arial.ttf]")
     label_parser.add_argument("-S", "--font-size", default=50, type=int, help="Font size [default: 50]")
-
 
     # view parser
     view_parser = subparsers.add_parser("view", help="Image viewer")
@@ -192,23 +215,7 @@ def main():
                              help="Hide the calibration grid [default: false]")
 
     args = parser.parse_args()
-
-    # signer label -n names.csv -t template.png -F font.ttf -O output_folder
-    if args.command == "label":
-        names = list()
-        with open(args.names, "r") as f:
-            names = f.readlines()
-        print(names)
-        if not args.output_dir.exists():
-            args.output_dir.mkdir(parents=True)
-        for name in names:
-            write_text_on_png(name, args.template, output_dir=args.output_dir, font_path=args.font, font_size=args.font_size)
-    # signer view template.png [--show-grid]
-    elif args.command == "view":
-        image_viewer = ImageViewer(args.image_name, show_grid=args.show_grid)
-        image_viewer.run()
-
-    return 0
+    return args
 
 
 if __name__ == '__main__':
