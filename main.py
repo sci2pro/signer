@@ -2,6 +2,7 @@ import argparse
 import pathlib
 import sys
 import tkinter as tk
+from tkinter import ttk
 
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 
@@ -20,10 +21,9 @@ class ImageViewer:
 
         # Canvas + scrollbars
         self.canvas = tk.Canvas(self.root, highlightthickness=0, bg="#888888")
-        self.hbar = tk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
-        self.vbar = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
-        self.statusbar = tk.Label(self.root)
-        self.statusbar.configure(anchor="w")
+        self.hbar = ttk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
+        self.vbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.statusbar = ttk.Label(self.root, anchor="w")
         self.canvas.configure(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
 
         # Geometry
