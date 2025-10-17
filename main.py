@@ -12,6 +12,7 @@ class ImageViewer:
     def __init__(self, image_path, show_grid=True):
         self.root = tk.Tk()
         self.root.title("Image Viewer")
+        self.root.config(cursor="crosshair")
         self.image_path = image_path
         self.pil_image = Image.open(image_path)
         self.scale = 1.0  # 1:1
@@ -21,6 +22,8 @@ class ImageViewer:
         self.canvas = tk.Canvas(self.root, highlightthickness=0, bg="#888888")
         self.hbar = tk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
         self.vbar = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.statusbar = tk.Label(self.root)
+        self.statusbar.configure(anchor="w")
         self.canvas.configure(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
 
         # Geometry
@@ -29,6 +32,7 @@ class ImageViewer:
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.vbar.grid(row=0, column=1, sticky="ns")
         self.hbar.grid(row=1, column=0, sticky="ew")
+        self.statusbar.grid(row=2, column=0, sticky="nsew")
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
@@ -57,6 +61,9 @@ class ImageViewer:
         # Click to print image coordinates (relative to the original image)
         self.canvas.bind("<Button-1>", self._print_image_coords)
         self.name_coordinates_file = "name_coords.txt"
+
+        # Mouse moves to show the coordinates in the status bar
+        self.canvas.bind("<Motion>", self._display_mouse_position)
 
     def _render(self):
         # Re-render the scaled image and update the scrollregion
@@ -135,6 +142,9 @@ class ImageViewer:
     def _pan_move(self, event):
         self.canvas.scan_dragto(event.x, event.y, gain=1)
 
+    def _display_mouse_position(self, event):
+        self.statusbar.configure(text=f"Mouse position: {event.x}, {event.y}")
+
     def _print_image_coords(self, event):
         # Convert canvas coords to image coords, then to original-image coords
         cx = self.canvas.canvasx(event.x)
@@ -152,7 +162,6 @@ class ImageViewer:
         self.root.mainloop()
 
 
-# def write_text_on_png(text, png, output_dir=pathlib.Path("./"), font_path="fonts/arial.ttf", font_size=50):
 def label_certificates(args):
     names = list()
     with open(args.names, "r") as f:
