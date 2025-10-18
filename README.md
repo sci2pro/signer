@@ -40,5 +40,5 @@ To view the template with an overlaid calibration grid enter:
 python main.py view --show-grid templates/template.png
 ```
 ![image 2](./gui.png)
-Clicking on any point on the displayed template will capture the coordinates of the labelling position into a file called `named_coords.txt` (as displayed).
+Clicking on any point on the displayed template will capture the coordinates of the labelling position into a file called `name_coords.txt` (as displayed).
 ![image 3](./capture-coords.png)
