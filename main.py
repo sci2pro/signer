@@ -25,6 +25,7 @@ class ImageViewer:
         self.vbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
         self.status_bar = ttk.Frame(self.root)
         self.image_size_status = ttk.Label(self.status_bar)
+        self.separator = ttk.Separator(self.status_bar, orient="vertical")
         self.mouse_position_status = ttk.Label(self.status_bar)
         self.canvas.configure(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
 
@@ -36,7 +37,8 @@ class ImageViewer:
         self.hbar.grid(row=1, column=0, sticky="ew")
         self.status_bar.grid(row=2, column=0, sticky="nsew")
         self.image_size_status.grid(row=2, column=0, sticky="nw")
-        self.mouse_position_status.grid(row=2, column=1, sticky="ne")
+        self.separator.grid(row=2, column=1, sticky="nsew")
+        self.mouse_position_status.grid(row=2, column=3, sticky="ne")
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
