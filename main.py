@@ -23,16 +23,20 @@ class ImageViewer:
         self.canvas = tk.Canvas(self.root, highlightthickness=0, bg="#888888")
         self.hbar = ttk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
         self.vbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
-        self.statusbar = ttk.Label(self.root, anchor="w")
+        self.status_bar = ttk.Frame(self.root)
+        self.image_size_status = ttk.Label(self.status_bar)
+        self.mouse_position_status = ttk.Label(self.status_bar)
         self.canvas.configure(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
 
         # Geometry
         w, h = self.pil_image.size
-        self.canvas.configure(width=min(1000, w), height=min(800, h))
+        self.canvas.configure(width=min(1200, w), height=min(900, h))
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.vbar.grid(row=0, column=1, sticky="ns")
         self.hbar.grid(row=1, column=0, sticky="ew")
-        self.statusbar.grid(row=2, column=0, sticky="nsew")
+        self.status_bar.grid(row=2, column=0, sticky="nsew")
+        self.image_size_status.grid(row=2, column=0, sticky="nw")
+        self.mouse_position_status.grid(row=2, column=1, sticky="ne")
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
@@ -68,6 +72,7 @@ class ImageViewer:
     def _render(self):
         # Re-render the scaled image and update the scrollregion
         w, h = self.pil_image.size
+        self.image_size_status.config(text=f"Image size: {w}x{h}")
         sw = max(1, int(w * self.scale))
         sh = max(1, int(h * self.scale))
         resized = self.pil_image.resize((sw, sh), Image.LANCZOS)
@@ -143,7 +148,7 @@ class ImageViewer:
         self.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def _display_mouse_position(self, event):
-        self.statusbar.configure(text=f"Mouse position: {event.x}, {event.y}")
+        self.mouse_position_status.configure(text=f"Mouse position: {event.x}, {event.y}")
 
     def _print_image_coords(self, event):
         # Convert canvas coords to image coords, then to original-image coords
