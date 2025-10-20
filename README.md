@@ -12,16 +12,32 @@
 * No limits on how many certificates you can sign. Most online platforms have a paltry free tier.
 
 ## Usage
+Install `signer` using the following command in a virtual environment:
+```shell
+pip install git+https://github.com/sci2pro/signer
+```
 Presently, there are two commands:
-1. `python main.py label` which *labels* a template with names provided from a file.
-2. `python main.py view` which displays a template with an optional grid to select where on the template the text will need to appear.
-Details on each is provided below.
+1. `signer label` which *labels* a template with names provided from a file.
+2. `signer view` which displays a template with an optional grid to select where on the template the text will need to appear.
+Details on each is provided below but you can view the help using:
+```shell
+signer --help
+usage: signer [-h] {label,view} ...
+
+positional arguments:
+  {label,view}
+    label       Label image
+    view        Image viewer
+
+options:
+  -h, --help    show this help message and exit
+```
 
 ### Labelling a template
 Given a template file, we would like to label it using a list of names provided in a file. This assumes that you know where in the template the text will be placed. If you need to locate the writing position on the template then see the `Viewing a template` section below.
 
 ```shell
-python main.py label -n names.csv -t templates/template.png -F fonts/arial.ttf -S 60 -O output_dir
+signer label -n names.csv -t templates/template.png -F fonts/arial.ttf -S 60 -O output_dir
 ```
 where
 * `-n` is the name of a CSV file with a column of names;
@@ -37,7 +53,7 @@ Below is an example of a labelled template
 ### Viewing a template
 To view the template with an overlaid calibration grid enter:
 ```shell
-python main.py view --show-grid templates/template.png
+signer view --show-grid templates/template.png
 ```
 ![image 2](./gui.png)
 Clicking on any point on the displayed template will capture the coordinates of the labelling position into a file called `name_coords.txt` (as displayed).

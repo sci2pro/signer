@@ -1,0 +1,32 @@
+[build-system]
+requires =  ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["signer"]
+
+[project]
+name = "signer"
+version = "0.1"
+authors = [
+    { name="Paul K. Korir, PhD", email="code@sci2pro.com" },
+    ]
+description = "`signer` is a CLI tool to label certificates quickly and efficiently."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+    "pillow",
+]
+
+[project.urls]
+Homepage = "https://githu.com/sci2pro/signer"
+Issues = "https://github.com/sci2pro/signer/issues"
+
+[project.scripts]
+signer = "main:main"

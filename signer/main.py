@@ -66,7 +66,7 @@ class ImageViewer:
 
         # Click to print image coordinates (relative to the original image)
         self.canvas.bind("<Button-1>", self._print_image_coords)
-        self.name_coordinates_file = "name_coords.txt"
+        self.name_coordinates_file = "../name_coords.txt"
 
         # Mouse moves to show the coordinates in the status bar
         self.canvas.bind("<Motion>", self._display_mouse_position)
@@ -185,26 +185,13 @@ def label_certificates(args):
         font_width = font.getlength(name)
         text_colour = (0, 0, 0)  # red
         # get the location to sign
-        with open("name_coords.txt") as f:
+        with open("../name_coords.txt") as f:
             name_coords = f.readlines()
         text_x, text_y = tuple(map(int, name_coords[0].split(",")))
         # adjust the x value
         draw.text((text_x - font_width / 2, text_y), name, font=font, fill=text_colour)
         img.save(args.output_dir / f"{name}-certificate.png")
     return
-
-
-def main():
-    args = parse_args()
-
-    # signer label -n names.csv -t template.png -F font.ttf -O output_folder
-    if args.command == "label":
-        label_certificates(args)
-    # signer view template.png [--show-grid]
-    elif args.command == "view":
-        view_template(args)
-
-    return 0
 
 
 def view_template(args: argparse.Namespace):
@@ -232,6 +219,19 @@ def parse_args() -> argparse.Namespace:
 
     args = parser.parse_args()
     return args
+
+
+def main():
+    args = parse_args()
+
+    # signer label -n names.csv -t template.png -F font.ttf -O output_folder
+    if args.command == "label":
+        label_certificates(args)
+    # signer view template.png [--show-grid]
+    elif args.command == "view":
+        view_template(args)
+
+    return 0
 
 
 if __name__ == '__main__':
