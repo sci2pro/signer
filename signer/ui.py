@@ -30,6 +30,8 @@ class MainWindow(QMainWindow):
         # template file: label | lineedit | filedialog
         template_layout = QHBoxLayout()
         self.template_file = QLineEdit()
+        self.template_file.setPlaceholderText("Select template file...")
+        self.template_file.setReadOnly(True)
         template_layout.addWidget(self.template_file)
         self.template_browse_button = QPushButton("Browse...")
         self.template_browse_button.clicked.connect(self.select_template_file)
@@ -39,11 +41,24 @@ class MainWindow(QMainWindow):
         # font file: label | linedit | filedialog
         fonts_layout = QHBoxLayout()
         self.fonts_file = QLineEdit()
+        self.fonts_file.setPlaceholderText("Select font file...")
+        self.fonts_file.setReadOnly(True)
         fonts_layout.addWidget(self.fonts_file)
         self.fonts_browse_button = QPushButton("Browse...")
         self.fonts_browse_button.clicked.connect(self.select_font_file)
         fonts_layout.addWidget(self.fonts_browse_button)
         layout.addRow(QLabel("Font file"), fonts_layout)
+
+        # output directory: label | linedit | filedialog
+        output_layout = QHBoxLayout()
+        self.output_dir = QLineEdit()
+        self.output_dir.setPlaceholderText("Select output directory")
+        self.output_dir.setReadOnly(True)
+        output_layout.addWidget(self.output_dir)
+        self.output_browse_button = QPushButton("Browse...")
+        self.output_browse_button.clicked.connect(self.select_font_file)
+        output_layout.addWidget(self.output_browse_button)
+        layout.addRow(QLabel("Output directory"), output_layout)
 
         # actions
         self.label_button = QPushButton("Label")
