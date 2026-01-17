@@ -3,7 +3,7 @@ import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, \
-    QVBoxLayout, QWidget
+    QWidget, QFormLayout
 
 from ops import label_certificates, parse_args
 
@@ -13,33 +13,37 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Signer")
+        self.setFixedSize(800, 600)
 
+        layout = QFormLayout()
         # names file: label | lineedit | filedialog
         names_layout = QHBoxLayout()
-        names_layout.addWidget(QLabel("Names file"))
         self.names_file = QLineEdit()
+        self.names_file.setPlaceholderText("Select names file...")
+        self.names_file.setReadOnly(True)
         names_layout.addWidget(self.names_file)
         self.names_browse_button = QPushButton("Browse...")
         self.names_browse_button.clicked.connect(self.select_names_file)
         names_layout.addWidget(self.names_browse_button)
+        layout.addRow(QLabel("Names file"), names_layout)
 
         # template file: label | lineedit | filedialog
         template_layout = QHBoxLayout()
-        template_layout.addWidget(QLabel("Template"))
         self.template_file = QLineEdit()
         template_layout.addWidget(self.template_file)
         self.template_browse_button = QPushButton("Browse...")
         self.template_browse_button.clicked.connect(self.select_template_file)
         template_layout.addWidget(self.template_browse_button)
+        layout.addRow(QLabel("Template file"), template_layout)
 
         # font file: label | linedit | filedialog
         fonts_layout = QHBoxLayout()
-        fonts_layout.addWidget(QLabel("Font file"))
         self.fonts_file = QLineEdit()
         fonts_layout.addWidget(self.fonts_file)
         self.fonts_browse_button = QPushButton("Browse...")
         self.fonts_browse_button.clicked.connect(self.select_font_file)
         fonts_layout.addWidget(self.fonts_browse_button)
+        layout.addRow(QLabel("Font file"), fonts_layout)
 
         # actions
         self.label_button = QPushButton("Label")
@@ -51,11 +55,11 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.close_button)
         button_layout.setAlignment(Qt.AlignRight)
 
-        layout = QVBoxLayout()
-        layout.addLayout(names_layout)
-        layout.addLayout(template_layout)
-        layout.addLayout(fonts_layout)
-        layout.addLayout(button_layout)
+        # layout = QVBoxLayout()
+        # layout.addLayout(names_layout)
+        # layout.addLayout(template_layout)
+        # layout.addLayout(fonts_layout)
+        layout.addRow(button_layout)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -85,6 +89,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     window = MainWindow()
     window.show()
     return app.exec()
