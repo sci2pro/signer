@@ -22,6 +22,11 @@ license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
 dependencies = [
     "pillow",
+    "pillow==11.3.0",
+    "PySide6==6.10.1",
+    "PySide6_Addons==6.10.1",
+    "PySide6_Essentials==6.10.1",
+    "shiboken6==6.10.1",
 ]
 
 [project.urls]

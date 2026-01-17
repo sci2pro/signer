@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
     def label(self):
         print(f"Labeling...")
         sys.argv = shlex.split(
-            f"signer label -n {self.names_file.text()} -t {self.template_file.text()} -F {self.fonts_file.text()}")
+            f"signer label -n '{self.names_file.text()}' -t '{self.template_file.text()}' -F '{self.fonts_file.text()}'")
         args = parse_args()
         label_certificates(args)
 
