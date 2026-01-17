@@ -1,1 +1,7 @@
+petl==1.7.17
 pillow==11.3.0
+PySide6==6.10.1
+PySide6_Addons==6.10.1
+PySide6_Essentials==6.10.1
+shiboken6==6.10.1
+-e git+https://github.com/sci2pro/signer.git@131c6c973e5f463abc246d3563a82160c406ebf8#egg=signer
