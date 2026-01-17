@@ -8,6 +8,30 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QLabel, QL
 from ops import label_certificates, parse_args
 
 
+class FileSelectHandle:
+    def __init__(self, parent: QMainWindow, attribute_name: str, *, caption="Open file", dir="./", filter: str = "",
+                 selectedFilter: str = "", options=QFileDialog.Options(),
+                 fileMode: QFileDialog.FileMode = QFileDialog.FileMode.AnyFile):
+        self.parent = parent
+        self.attribute_name = attribute_name
+        self.caption = caption
+        self.dir = dir
+        self.filter = filter
+        self.selectedFilter = selectedFilter
+        self.options = options
+        self.fileMode = fileMode
+
+    def __call__(self, *args):
+        dialog = QFileDialog(self.parent)
+        dialog.setFileMode(self.fileMode)
+        if self.fileMode == QFileDialog.FileMode.Directory:
+            file_name = dialog.getExistingDirectory(caption=self.caption, dir=self.dir)
+        elif self.fileMode == QFileDialog.FileMode.AnyFile:
+            file_name, selectedFilter = dialog.getOpenFileName(self.parent, self.caption, self.dir, self.filter,
+                                                           self.selectedFilter, self.options)
+        self.parent.__getattribute__(self.attribute_name).setText(file_name)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -23,7 +47,8 @@ class MainWindow(QMainWindow):
         self.names_file.setReadOnly(True)
         names_layout.addWidget(self.names_file)
         self.names_browse_button = QPushButton("Browse...")
-        self.names_browse_button.clicked.connect(self.select_names_file)
+        self.names_browse_button.clicked.connect(
+            FileSelectHandle(self, "names_file", filter="Text files (*.txt *.csv *.tsv)"))
         names_layout.addWidget(self.names_browse_button)
         layout.addRow(QLabel("Names file"), names_layout)
 
@@ -34,7 +59,8 @@ class MainWindow(QMainWindow):
         self.template_file.setReadOnly(True)
         template_layout.addWidget(self.template_file)
         self.template_browse_button = QPushButton("Browse...")
-        self.template_browse_button.clicked.connect(self.select_template_file)
+        self.template_browse_button.clicked.connect(
+            FileSelectHandle(self, "template_file", filter="Images (*.png *.jpg *.jpeg *.tiff *.tif)"))
         template_layout.addWidget(self.template_browse_button)
         layout.addRow(QLabel("Template file"), template_layout)
 
@@ -45,7 +71,10 @@ class MainWindow(QMainWindow):
         self.fonts_file.setReadOnly(True)
         fonts_layout.addWidget(self.fonts_file)
         self.fonts_browse_button = QPushButton("Browse...")
-        self.fonts_browse_button.clicked.connect(self.select_font_file)
+        # the argument to connect has to be a callable
+        # I need a callable that takes arguments
+        self.fonts_browse_button.clicked.connect(
+            FileSelectHandle(self, "fonts_file", filter="Font files (*.otf *.off *.ttf *.woff)"))
         fonts_layout.addWidget(self.fonts_browse_button)
         layout.addRow(QLabel("Font file"), fonts_layout)
 
@@ -56,7 +85,9 @@ class MainWindow(QMainWindow):
         self.output_dir.setReadOnly(True)
         output_layout.addWidget(self.output_dir)
         self.output_browse_button = QPushButton("Browse...")
-        self.output_browse_button.clicked.connect(self.select_font_file)
+        self.output_browse_button.clicked.connect(
+            FileSelectHandle(self, "output_dir", options=QFileDialog.Options.ShowDirsOnly,
+                             fileMode=QFileDialog.FileMode.Directory))
         output_layout.addWidget(self.output_browse_button)
         layout.addRow(QLabel("Output directory"), output_layout)
 
@@ -70,10 +101,6 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.close_button)
         button_layout.setAlignment(Qt.AlignRight)
 
-        # layout = QVBoxLayout()
-        # layout.addLayout(names_layout)
-        # layout.addLayout(template_layout)
-        # layout.addLayout(fonts_layout)
         layout.addRow(button_layout)
 
         widget = QWidget()
@@ -81,23 +108,14 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(widget)
 
-    def select_names_file(self):
-        file_name, selectedFilter = QFileDialog.getOpenFileName(self, "Open file", "./", "*.csv *.txt *.tsv")
-        self.names_file.setText(file_name)
-
-    def select_template_file(self):
-        file_name, selectedFilter = QFileDialog.getOpenFileName(self, "Open file", "./",
-                                                                "*.png *.jpg *.jpeg *.tiff *.tif")
-        self.template_file.setText(file_name)
-
-    def select_font_file(self):
-        file_name, selectedFilter = QFileDialog.getOpenFileName(self, "Open file", "./", "*.off *.otf *.ttf")
-        self.fonts_file.setText(file_name)
-
     def label(self):
         print(f"Labeling...")
         sys.argv = shlex.split(
-            f"signer label -n '{self.names_file.text()}' -t '{self.template_file.text()}' -F '{self.fonts_file.text()}'")
+            f"signer label -n '{self.names_file.text()}' "
+            f"-t '{self.template_file.text()}' "
+            f"-F '{self.fonts_file.text()}' "
+            f"-O '{self.output_dir.text()}'"
+        )
         args = parse_args()
         label_certificates(args)
 
