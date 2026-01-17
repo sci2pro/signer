@@ -168,13 +168,22 @@ class ImageViewer:
         print(f"Image size: {self.pil_image.size}")
         self.root.mainloop()
 
+def hex_to_rgb(hex):
+    """Convert a hex string to an RGB tuple."""
+    hex = hex.lstrip('#')
+    r, g, b = hex[:2], hex[2:4], hex[4:6]
+    r_int = int(r, 16)
+    g_int = int(g, 16)
+    b_int = int(b, 16)
+    return (r_int, g_int, b_int)
+
 
 def label_certificates(args):
     names = list()
     with open(args.names, "r") as f:
         names = f.readlines()
-    print(names)
     if not args.output_dir.exists():
+        print(f"Creating output directory '{args.output_dir}'...")
         args.output_dir.mkdir(parents=True)
     for name in names:
         # write text on the image at location
@@ -183,14 +192,14 @@ def label_certificates(args):
         font = ImageFont.truetype(args.font_path, args.font_size)
         # we need to know the length of the font so that we can adjust
         font_width = font.getlength(name)
-        text_colour = (0, 0, 0)  # red
+        text_colour = hex_to_rgb(args.font_colour)  # red
         # get the location to sign
         with open("../name_coords.txt") as f:
             name_coords = f.readlines()
         text_x, text_y = tuple(map(int, name_coords[0].split(",")))
         # adjust the x value
         draw.text((text_x - font_width / 2, text_y), name, font=font, fill=text_colour)
-        img.save(args.output_dir / f"{name}-certificate.png")
+        img.save(args.output_dir / f"{name.strip().replace(' ', '_')}-certificate.{args.output_format}")
     return
 
 
@@ -208,8 +217,10 @@ def parse_args() -> argparse.Namespace:
     label_parser.add_argument("-n", "--names", help="A CSV file with a name on each row")
     label_parser.add_argument("-t", "--template", help="A template image")
     label_parser.add_argument("-O", "--output-dir", default="output_dir", type=pathlib.Path, help="Output directory")
+    label_parser.add_argument("-f", "--output-format", default="png", choices=["png", "tif", "tiff", "jpeg", "jpg", "webp", "bmp", "pdf", "eps", "gif", "jp2", "j2k", "jpx"], help="Output format [default: png]")
     label_parser.add_argument("-F", "--font-path", default="fonts/arial.ttf", help="Font file [default: arial.ttf]")
     label_parser.add_argument("-S", "--font-size", default=50, type=int, help="Font size [default: 50]")
+    label_parser.add_argument("-C", "--font-colour", default="#000000", help="Font colour in hex (don't forget to quote the colour e.g., '#ff22aa' [default: '#000000']")
 
     # view parser
     view_parser = subparsers.add_parser("view", help="Image viewer")
