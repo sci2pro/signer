@@ -1,5 +1,7 @@
 import argparse
 import pathlib
+import re
+import sys
 import tkinter as tk
 from tkinter import ttk
 
@@ -45,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     label_parser.add_argument("-n", "--names", help="A CSV file with a name on each row")
     label_parser.add_argument("-t", "--template", help="A template image")
     label_parser.add_argument("-O", "--output-dir", default="output_dir", type=pathlib.Path, help="Output directory")
-    label_parser.add_argument("-f", "--output-format", default="png",
+    label_parser.add_argument("-f", "--output-format", default="pdf",
                               choices=["png", "tif", "tiff", "jpeg", "jpg", "webp", "bmp", "pdf", "eps", "gif", "jp2",
                                        "j2k", "jpx"], help="Output format [default: png]")
     label_parser.add_argument("-F", "--font-path", default="fonts/arial.ttf", help="Font file [default: arial.ttf]")
@@ -63,6 +65,15 @@ def parse_args() -> argparse.Namespace:
     gui_parser = subparsers.add_parser("gui", help="GUI")
 
     args = parser.parse_args()
+    # validation
+    if args.command == "label":
+        if (not args.font_colour.startswith("#") or
+                len(args.font_colour) != 7 or
+                re.match(r"^#[0-9a-f]{6}$", args.font_colour) is None):
+            print(
+                f"Invalid font colour: '{args.font_colour}'; must be the form '#<hex><hex><hex><hex><hex><hex>' where <hex> is from the set 0-9 and a-f",
+                file=sys.stderr)
+
     return args
 
 

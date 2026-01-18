@@ -3,7 +3,7 @@ import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, \
-    QWidget, QFormLayout
+    QWidget, QFormLayout, QSizePolicy, QGroupBox
 
 from ops import label_certificates, parse_args
 
@@ -28,7 +28,7 @@ class FileSelectHandle:
             file_name = dialog.getExistingDirectory(caption=self.caption, dir=self.dir)
         elif self.fileMode == QFileDialog.FileMode.AnyFile:
             file_name, selectedFilter = dialog.getOpenFileName(self.parent, self.caption, self.dir, self.filter,
-                                                           self.selectedFilter, self.options)
+                                                               self.selectedFilter, self.options)
         self.parent.__getattribute__(self.attribute_name).setText(file_name)
 
 
@@ -37,9 +37,12 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Signer")
-        self.setFixedSize(800, 600)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.setMinimumWidth(800)
 
-        layout = QFormLayout()
+        form_layout = QFormLayout()
+        form_layout.setVerticalSpacing(0)
+        form_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         # names file: label | lineedit | filedialog
         names_layout = QHBoxLayout()
         self.names_file = QLineEdit()
@@ -50,7 +53,7 @@ class MainWindow(QMainWindow):
         self.names_browse_button.clicked.connect(
             FileSelectHandle(self, "names_file", filter="Text files (*.txt *.csv *.tsv)"))
         names_layout.addWidget(self.names_browse_button)
-        layout.addRow(QLabel("Names file"), names_layout)
+        form_layout.addRow(QLabel("Names file"), names_layout)
 
         # template file: label | lineedit | filedialog
         template_layout = QHBoxLayout()
@@ -62,7 +65,7 @@ class MainWindow(QMainWindow):
         self.template_browse_button.clicked.connect(
             FileSelectHandle(self, "template_file", filter="Images (*.png *.jpg *.jpeg *.tiff *.tif)"))
         template_layout.addWidget(self.template_browse_button)
-        layout.addRow(QLabel("Template file"), template_layout)
+        form_layout.addRow(QLabel("Template file"), template_layout)
 
         # font file: label | linedit | filedialog
         fonts_layout = QHBoxLayout()
@@ -76,7 +79,7 @@ class MainWindow(QMainWindow):
         self.fonts_browse_button.clicked.connect(
             FileSelectHandle(self, "fonts_file", filter="Font files (*.otf *.off *.ttf *.woff)"))
         fonts_layout.addWidget(self.fonts_browse_button)
-        layout.addRow(QLabel("Font file"), fonts_layout)
+        form_layout.addRow(QLabel("Font file"), fonts_layout)
 
         # output directory: label | linedit | filedialog
         output_layout = QHBoxLayout()
@@ -89,22 +92,32 @@ class MainWindow(QMainWindow):
             FileSelectHandle(self, "output_dir", options=QFileDialog.Options.ShowDirsOnly,
                              fileMode=QFileDialog.FileMode.Directory))
         output_layout.addWidget(self.output_browse_button)
-        layout.addRow(QLabel("Output directory"), output_layout)
+        form_layout.addRow(QLabel("Output directory"), output_layout)
+
+        # font: spinbox | size | colour
+        # font_group = QGroupBox("Font")
+        # font_layout = QHBoxLayout()
+        # font_layout.addWidget(QLabel("Name"))
+        # font_layout.addWidget(QFont)
+        # font_group.setLayout(font_layout)
+
+        form_layout.addRow(QLabel("Font file"), font_layout)
 
         # actions
         self.label_button = QPushButton("Label")
         self.label_button.clicked.connect(self.label)
         self.close_button = QPushButton("Exit")
         self.close_button.clicked.connect(self.close)
+
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.label_button)
         button_layout.addWidget(self.close_button)
         button_layout.setAlignment(Qt.AlignRight)
 
-        layout.addRow(button_layout)
+        form_layout.addRow(button_layout)
 
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(form_layout)
 
         self.setCentralWidget(widget)
 
@@ -122,7 +135,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    # app.setStyle("Fusion")
     window = MainWindow()
     window.show()
     return app.exec()
